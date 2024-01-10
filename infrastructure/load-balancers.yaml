@@ -40,10 +40,7 @@ Resources:
       DefaultActions:
         - Type: forward
           TargetGroupArn: !Ref DefaultTargetGroup
-
-  # We define a default target group here, as this is a mandatory Parameters
-  # when creating an Application Load Balancer Listener. This is not used, instead
-  # a target group is created per-service in each service template (../services/*)
+  
   DefaultTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
@@ -51,6 +48,13 @@ Resources:
       VpcId: !Ref VPC
       Port: 80
       Protocol: HTTP
+      Matcher:
+        HttpCode: 200-299
+      HealthCheckIntervalSeconds: 10
+      HealthCheckPath: /actuator/health
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
 
 Outputs:
   LoadBalancer:
@@ -64,3 +68,7 @@ Outputs:
   Listener:
     Description: A reference to a port 80 listener
     Value: !Ref LoadBalancerListener
+  
+  TargetGroup:
+    Description: Load balancer target group
+    Value: !Ref DefaultTargetGroup

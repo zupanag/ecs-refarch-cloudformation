@@ -9,10 +9,7 @@ Description: >
   ECS hosts distributed across multiple Availability Zones. 
 
   Finally, it deploys a pair of example ECS services from containers published in 
-  Amazon EC2 Container Registry (Amazon ECR).
-
-  Last Modified: 22nd September 2016
-  Author: Paul Maddox <pmaddox@amazon.com>
+  Amazon EC2 Container Registry (Amazon ECR)
 
 Resources:
   VPC:
@@ -55,13 +52,13 @@ Resources:
       TemplateURL: https://zupan-cloud-formation.s3.eu-central-1.amazonaws.com/tagforce-backend/ecs-refarch-cloudformation/infrastructure/ecs-cluster.yaml
       Parameters:
         EnvironmentName: !Ref AWS::StackName
-        InstanceType: t3.medium
+        InstanceType: t3.small
         ClusterSize: 2
         VPC: !GetAtt VPC.Outputs.VPC
         SecurityGroup: !GetAtt SecurityGroups.Outputs.ECSHostSecurityGroup
         Subnets: !GetAtt VPC.Outputs.PrivateSubnets
 
-  WebsiteService:
+  WebService:
     Type: AWS::CloudFormation::Stack
     DeletionPolicy: Delete
     Properties:
@@ -71,6 +68,7 @@ Resources:
         Cluster: !GetAtt ECS.Outputs.Cluster
         DesiredCount: 2
         Listener: !GetAtt ALB.Outputs.Listener
+        TargetGroup: !GetAtt ALB.Outputs.TargetGroup
         Path: "/*"
         ECSServiceAutoScalingRoleARN: !GetAtt ECS.Outputs.ECSServiceAutoScalingRole
 
@@ -84,6 +82,6 @@ Resources:
         ECSAutoScalingGroupName: !GetAtt ECS.Outputs.ECSAutoScalingGroupName
 
 Outputs:
-  WebsiteServiceUrl:
+  WebServiceUrl:
     Description: The URL endpoint for the website service
     Value: !Join ["", [!GetAtt ALB.Outputs.LoadBalancerUrl, "/"]]
